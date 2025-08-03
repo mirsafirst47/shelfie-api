@@ -35,4 +35,34 @@ router.get('/:customerId/purchases', async (req, res) => {
   }
 });
 
+// GET /api/customers - Get all customers
+router.get('/', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT 
+        c.customer_id,
+        c.phone_number,
+        c.email,
+        c.store_name,
+        c.created_at,
+        COUNT(p.id) as purchase_count
+      FROM customers c
+      LEFT JOIN purchases p ON c.customer_id = p.customer_id
+      GROUP BY c.customer_id, c.phone_number, c.email, c.store_name, c.created_at
+      ORDER BY c.created_at DESC
+    `);
+    
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch customers'
+    });
+  }
+});
+
 module.exports = router;

@@ -7,6 +7,7 @@ let currentView = 'products';
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
+    loadCustomers();
 });
 
 // Show purchase update notification
@@ -163,13 +164,26 @@ async function loadCustomerPurchases() {
     showLoading(true);
     
     try {
-        const response = await fetch(`${API_BASE}/api/customers/${customerId}/purchases`);
-        const data = await response.json();
-        
-        if (data.success) {
-            displayPurchases(data.data);
+        if (customerId === 'ALL') {
+            // Show all customers and their purchase counts
+            const customersResponse = await fetch(`${API_BASE}/api/customers`);
+            const customersData = await customersResponse.json();
+            
+            if (customersData.success) {
+                displayAllCustomers(customersData.data);
+            } else {
+                showError('Failed to load customers');
+            }
         } else {
-            showError('Failed to load purchases');
+            // Show specific customer purchases
+            const response = await fetch(`${API_BASE}/api/customers/${customerId}/purchases`);
+            const data = await response.json();
+            
+            if (data.success) {
+                displayPurchases(data.data);
+            } else {
+                showError('Failed to load purchases');
+            }
         }
     } catch (error) {
         console.error('Error loading purchases:', error);
@@ -237,6 +251,76 @@ function displayPurchases(purchases) {
     }).join('');
 }
 
+// Display all customers overview
+function displayAllCustomers(customers) {
+    const grid = document.getElementById('purchases-grid');
+    
+    if (customers.length === 0) {
+        grid.innerHTML = '<p>No customers found.</p>';
+        return;
+    }
+    
+    grid.innerHTML = customers.map(customer => {
+        const isNewCustomer = customer.customer_id.startsWith('CUST-') && customer.customer_id.length > 8;
+        const customerType = isNewCustomer ? '🆕 New Customer' : '👤 Existing Customer';
+        
+        return `
+            <div class="purchase-card" onclick="selectCustomer('${customer.customer_id}')">
+                <div class="product-header">
+                    <span class="product-icon">${isNewCustomer ? '🆕' : '👤'}</span>
+                    <span class="product-name">${customer.customer_id}</span>
+                </div>
+                <div class="product-details">
+                    <div class="product-detail">
+                        <strong>Type:</strong>
+                        <span>${customerType}</span>
+                    </div>
+                    <div class="product-detail">
+                        <strong>Phone:</strong>
+                        <span>${customer.phone_number || 'Not provided'}</span>
+                    </div>
+                    <div class="product-detail">
+                        <strong>Email:</strong>
+                        <span>${customer.email || 'Not provided'}</span>
+                    </div>
+                    <div class="product-detail">
+                        <strong>Purchases:</strong>
+                        <span>${customer.purchase_count} items</span>
+                    </div>
+                    <div class="product-detail">
+                        <strong>Created:</strong>
+                        <span>${formatDate(customer.created_at)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Select specific customer from overview
+function selectCustomer(customerId) {
+    const select = document.getElementById('customer-select');
+    
+    // Check if customer exists in dropdown, if not add them
+    let optionExists = false;
+    for (let option of select.options) {
+        if (option.value === customerId) {
+            optionExists = true;
+            break;
+        }
+    }
+    
+    if (!optionExists) {
+        const option = document.createElement('option');
+        option.value = customerId;
+        option.textContent = customerId;
+        select.appendChild(option);
+    }
+    
+    select.value = customerId;
+    loadCustomerPurchases();
+}
+
 // Test API endpoints
 async function testEndpoint(endpoint) {
     const responseContent = document.getElementById('response-content');
@@ -295,6 +379,7 @@ let refreshInterval;
 function startAutoRefresh() {
     refreshInterval = setInterval(() => {
         if (currentView === 'purchases') {
+            loadCustomers();
             loadCustomerPurchases();
         }
     }, 10000); // Refresh every 10 seconds
@@ -323,3 +408,40 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
     startAutoRefresh();
 });
+
+// Load customers for dropdown
+async function loadCustomers() {
+    try {
+        const response = await fetch(`${API_BASE}/api/customers`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const select = document.getElementById('customer-select');
+            const currentValue = select.value;
+            
+            // Clear existing options except static ones
+            select.innerHTML = `
+                <option value="CUST-001">Customer 001</option>
+                <option value="CUST-002">Customer 002</option>
+                <option value="ALL">🔍 Show All Customers</option>
+            `;
+            
+            // Add new customers
+            data.data.forEach(customer => {
+                if (!customer.customer_id.match(/^CUST-00[12]$/)) {
+                    const option = document.createElement('option');
+                    option.value = customer.customer_id;
+                    option.textContent = `${customer.customer_id} ${customer.customer_id.includes('CUST-') && customer.customer_id.length > 8 ? '(New)' : ''}`;
+                    select.appendChild(option);
+                }
+            });
+            
+            // Restore selection if it still exists
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading customers:', error);
+    }
+}

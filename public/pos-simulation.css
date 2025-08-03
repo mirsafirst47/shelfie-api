@@ -717,3 +717,80 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* New Customer Form */
+.new-customer-form {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.new-customer-form.hidden {
+    display: none;
+}
+
+.new-customer-form h4 {
+    color: #374151;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.new-customer-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.new-customer-form input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.create-customer-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.create-customer-btn:hover {
+    background: #059669;
+}
+
+.cancel-btn {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    background: #4b5563;
+}
+
+/* Mobile improvements for new customer form */
+@media (max-width: 768px) {
+    .new-customer-form {
+        padding: 16px;
+    }
+    
+    .create-customer-btn, .cancel-btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+}

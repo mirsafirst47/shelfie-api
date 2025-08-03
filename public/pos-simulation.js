@@ -211,54 +211,6 @@ function updateCustomer() {
     }
 }
 
-// // Process checkout
-// async function processCheckout() {
-//     if (cart.length === 0) return;
-    
-//     // Show processing animation
-//     const checkoutBtn = document.getElementById('checkout-btn');
-//     const originalText = checkoutBtn.innerHTML;
-//     checkoutBtn.innerHTML = '⏳ Processing Payment...';
-//     checkoutBtn.disabled = true;
-    
-//     // Simulate payment processing
-//     setTimeout(async () => {
-//         // If customer has app, sync purchase data
-//         if (currentCustomer !== 'CUST-NEW') {
-//             updateShelFieActions('💫 Syncing purchase data to ShelFie API...');
-            
-//             // Simulate API calls to add purchases
-//             for (const item of cart) {
-//                 try {
-//                     await fetch('/api/customers/' + currentCustomer + '/purchases', {
-//                         method: 'POST',
-//                         headers: {
-//                             'Content-Type': 'application/json'
-//                         },
-//                         body: JSON.stringify({
-//                             product_sku: item.sku,
-//                             store_name: 'Walmart Supercenter',
-//                             quantity: item.quantity
-//                         })
-//                     });
-//                 } catch (error) {
-//                     console.log('Simulated API call (would work with real backend)');
-//                 }
-//             }
-            
-//             updateShelFieActions('✅ All products synced to customer app with expiration alerts');
-//         }
-        
-//         // Show success modal
-//         showCheckoutSuccess();
-        
-//         // Reset button
-//         checkoutBtn.innerHTML = originalText;
-//         checkoutBtn.disabled = false;
-//     }, 2000);
-// }
-
-
 // Process checkout
 async function processCheckout() {
     if (cart.length === 0) return;
@@ -279,6 +231,7 @@ async function processCheckout() {
                 // Prepare checkout data
                 const checkoutData = {
                     customer_id: currentCustomer,
+                    customer_info: newCustomerData, // Include new customer data if exists
                     store_name: 'Walmart Supercenter',
                     items: cart.map(item => ({
                         sku: item.sku,
@@ -323,9 +276,6 @@ async function processCheckout() {
         checkoutBtn.disabled = false;
     }, 2000);
 }
-
-
-
 
 // Show checkout success modal
 function showCheckoutSuccess() {
@@ -461,3 +411,76 @@ window.addEventListener('load', function() {
         updateShelFieActions('📡 POS integration active - Ready to capture expiration data');
     }, 1000);
 });
+
+// New customer creation variables
+let isCreatingNewCustomer = false;
+let newCustomerData = null;
+
+// Update customer selection function
+function updateCustomer() {
+    const select = document.getElementById('customer-select');
+    const status = document.getElementById('customer-status');
+    const newCustomerForm = document.getElementById('new-customer-form');
+    currentCustomer = select.value;
+    
+    if (currentCustomer === 'CUST-NEW') {
+        status.innerHTML = '<span style="color: #6b7280;">📱 No app detected - Manual receipt only</span>';
+        updateShelFieActions('Customer has no ShelFie app - expiration data not captured');
+        newCustomerForm.classList.add('hidden');
+        isCreatingNewCustomer = false;
+    } else if (currentCustomer === 'CREATE-NEW') {
+        status.innerHTML = '<span style="color: #3b82f6;">🆕 Creating new ShelFie customer...</span>';
+        updateShelFieActions('Ready to create new ShelFie customer account');
+        newCustomerForm.classList.remove('hidden');
+        isCreatingNewCustomer = true;
+    } else {
+        status.innerHTML = '<span class="app-indicator">📱 ShelFie App Detected</span>';
+        updateShelFieActions('Customer app connected - ready to sync expiration data');
+        newCustomerForm.classList.add('hidden');
+        isCreatingNewCustomer = false;
+    }
+}
+
+// Create new customer
+function createNewCustomer() {
+    const phone = document.getElementById('customer-phone').value;
+    const email = document.getElementById('customer-email').value;
+    
+    // Generate new customer ID
+    const timestamp = Date.now();
+    const newCustomerId = `CUST-${timestamp.toString().slice(-6)}`;
+    
+    // Store new customer data
+    newCustomerData = {
+        customer_id: newCustomerId,
+        phone_number: phone || null,
+        email: email || null,
+        is_new: true
+    };
+    
+    currentCustomer = newCustomerId;
+    
+    // Update UI
+    const status = document.getElementById('customer-status');
+    status.innerHTML = '<span style="color: #10b981;">✅ New ShelFie customer created!</span>';
+    
+    // Hide form
+    document.getElementById('new-customer-form').classList.add('hidden');
+    
+    // Reset dropdown to show the new customer
+    const select = document.getElementById('customer-select');
+    select.innerHTML += `<option value="${newCustomerId}" selected>🆕 ${newCustomerId} (New Customer)</option>`;
+    select.value = newCustomerId;
+    
+    updateShelFieActions(`✅ Created new customer ${newCustomerId} with ShelFie app`);
+    showAlert('success', '🎉 Customer Created!', `New ShelFie customer ${newCustomerId} ready for checkout`);
+    
+    isCreatingNewCustomer = false;
+}
+
+// Cancel new customer creation
+function cancelNewCustomer() {
+    document.getElementById('new-customer-form').classList.add('hidden');
+    document.getElementById('customer-select').value = 'CUST-001';
+    updateCustomer();
+}

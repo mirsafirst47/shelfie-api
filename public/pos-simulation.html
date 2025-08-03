@@ -57,7 +57,20 @@
                         <option value="CUST-001">Customer 001 (Phone: 555-0123)</option>
                         <option value="CUST-002">Customer 002 (Phone: 555-0456)</option>
                         <option value="CUST-NEW">Walk-in Customer (No app)</option>
+                        <option value="CREATE-NEW">🆕 Create New ShelFie Customer</option>
                     </select>
+                    
+                    <!-- New Customer Form (hidden by default) -->
+                    <div id="new-customer-form" class="new-customer-form hidden">
+                        <h4>Create New Customer</h4>
+                        <input type="text" id="customer-phone" placeholder="Phone Number (optional)" />
+                        <input type="email" id="customer-email" placeholder="Email (optional)" />
+                        <button onclick="createNewCustomer()" class="create-customer-btn">
+                            📱 Create & Download ShelFie App
+                        </button>
+                        <button onclick="cancelNewCustomer()" class="cancel-btn">Cancel</button>
+                    </div>
+                    
                     <div id="customer-status" class="customer-status">
                         <span class="app-indicator">📱 ShelFie App Detected</span>
                     </div>
