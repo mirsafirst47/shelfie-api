@@ -211,6 +211,54 @@ function updateCustomer() {
     }
 }
 
+// // Process checkout
+// async function processCheckout() {
+//     if (cart.length === 0) return;
+    
+//     // Show processing animation
+//     const checkoutBtn = document.getElementById('checkout-btn');
+//     const originalText = checkoutBtn.innerHTML;
+//     checkoutBtn.innerHTML = '⏳ Processing Payment...';
+//     checkoutBtn.disabled = true;
+    
+//     // Simulate payment processing
+//     setTimeout(async () => {
+//         // If customer has app, sync purchase data
+//         if (currentCustomer !== 'CUST-NEW') {
+//             updateShelFieActions('💫 Syncing purchase data to ShelFie API...');
+            
+//             // Simulate API calls to add purchases
+//             for (const item of cart) {
+//                 try {
+//                     await fetch('/api/customers/' + currentCustomer + '/purchases', {
+//                         method: 'POST',
+//                         headers: {
+//                             'Content-Type': 'application/json'
+//                         },
+//                         body: JSON.stringify({
+//                             product_sku: item.sku,
+//                             store_name: 'Walmart Supercenter',
+//                             quantity: item.quantity
+//                         })
+//                     });
+//                 } catch (error) {
+//                     console.log('Simulated API call (would work with real backend)');
+//                 }
+//             }
+            
+//             updateShelFieActions('✅ All products synced to customer app with expiration alerts');
+//         }
+        
+//         // Show success modal
+//         showCheckoutSuccess();
+        
+//         // Reset button
+//         checkoutBtn.innerHTML = originalText;
+//         checkoutBtn.disabled = false;
+//     }, 2000);
+// }
+
+
 // Process checkout
 async function processCheckout() {
     if (cart.length === 0) return;
@@ -223,40 +271,61 @@ async function processCheckout() {
     
     // Simulate payment processing
     setTimeout(async () => {
-        // If customer has app, sync purchase data
-        if (currentCustomer !== 'CUST-NEW') {
-            updateShelFieActions('💫 Syncing purchase data to ShelFie API...');
-            
-            // Simulate API calls to add purchases
-            for (const item of cart) {
-                try {
-                    await fetch('/api/customers/' + currentCustomer + '/purchases', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            product_sku: item.sku,
-                            store_name: 'Walmart Supercenter',
-                            quantity: item.quantity
-                        })
-                    });
-                } catch (error) {
-                    console.log('Simulated API call (would work with real backend)');
+        try {
+            // If customer has app, process real checkout
+            if (currentCustomer !== 'CUST-NEW') {
+                updateShelFieActions('💫 Processing checkout transaction...');
+                
+                // Prepare checkout data
+                const checkoutData = {
+                    customer_id: currentCustomer,
+                    store_name: 'Walmart Supercenter',
+                    items: cart.map(item => ({
+                        sku: item.sku,
+                        quantity: item.quantity,
+                        price: item.price
+                    })),
+                    total_amount: total
+                };
+                
+                // Process checkout via API
+                const API_BASE = window.location.origin;
+                const response = await fetch(`${API_BASE}/api/checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(checkoutData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    updateShelFieActions('✅ Checkout successful - All products synced to customer app!');
+                    updateShelFieActions('📱 Customer can now view purchases in ShelFie app');
+                } else {
+                    throw new Error('Checkout API failed');
                 }
+            } else {
+                updateShelFieActions('📄 Cash transaction completed - No app sync available');
             }
             
-            updateShelFieActions('✅ All products synced to customer app with expiration alerts');
+            // Show success modal
+            showCheckoutSuccess();
+            
+        } catch (error) {
+            console.error('Checkout error:', error);
+            updateShelFieActions('❌ Checkout failed - Using offline mode');
+            showCheckoutSuccess(); // Still show success for demo
         }
-        
-        // Show success modal
-        showCheckoutSuccess();
         
         // Reset button
         checkoutBtn.innerHTML = originalText;
         checkoutBtn.disabled = false;
     }, 2000);
 }
+
+
+
 
 // Show checkout success modal
 function showCheckoutSuccess() {

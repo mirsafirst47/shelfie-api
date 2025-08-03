@@ -5,6 +5,7 @@ require('dotenv').config();
 // Import routes
 const productRoutes = require('../routes/products');
 const customerRoutes = require('../routes/customers');
+const checkoutRoutes = require('../routes/checkout');
 
 // Create Express app
 const app = express();
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

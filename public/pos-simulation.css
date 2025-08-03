@@ -507,3 +507,213 @@ body {
         flex-direction: column;
     }
 }
+
+/* ========== POS MOBILE IMPROVEMENTS ========== */
+
+/* Mobile POS Layout */
+@media (max-width: 768px) {
+    .pos-header {
+        padding: 15px 20px;
+    }
+    
+    .store-info h1 {
+        font-size: 24px;
+    }
+    
+    .store-info p {
+        font-size: 14px;
+    }
+    
+    .pos-status {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+/* Touch-Friendly Scanning Buttons */
+@media (max-width: 768px) {
+    .scanning-area {
+        padding: 20px;
+    }
+    
+    .scanner-animation {
+        padding: 30px 20px;
+        margin-bottom: 20px;
+    }
+    
+    .scan-btn {
+        padding: 18px 16px; /* Bigger touch targets */
+        font-size: 16px;
+        margin-bottom: 12px;
+        min-height: 56px;
+        border-radius: 10px;
+    }
+    
+    .scan-btn:active {
+        transform: scale(0.98); /* Tap feedback */
+    }
+}
+
+/* Mobile Cart Interface */
+@media (max-width: 768px) {
+    .checkout-area {
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .cart-item {
+        padding: 16px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+    }
+    
+    .item-name {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    
+    .item-details {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    
+    .item-price {
+        font-size: 16px;
+    }
+}
+
+/* Mobile Checkout Actions */
+@media (max-width: 768px) {
+    .checkout-actions {
+        flex-direction: column;
+        gap: 12px;
+        margin: 25px 0;
+    }
+    
+    .checkout-button {
+        padding: 18px;
+        font-size: 17px;
+        min-height: 56px;
+        border-radius: 10px;
+    }
+    
+    .clear-button {
+        padding: 16px;
+        font-size: 16px;
+        min-height: 50px;
+        border-radius: 10px;
+    }
+}
+
+/* Mobile Customer Section */
+@media (max-width: 768px) {
+    .customer-section select {
+        padding: 14px 12px;
+        font-size: 16px; /* Prevents iOS zoom */
+        margin-bottom: 12px;
+        border-radius: 8px;
+    }
+    
+    .customer-status {
+        padding: 10px 14px;
+        font-size: 15px;
+        border-radius: 8px;
+    }
+}
+
+/* Mobile ShelFie Magic */
+@media (max-width: 768px) {
+    .shelfie-magic {
+        padding: 18px;
+        margin-top: 20px;
+    }
+    
+    .magic-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+}
+
+/* Mobile Modal */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 20px;
+        padding: 25px 20px;
+        border-radius: 12px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .primary-btn, .secondary-btn {
+        padding: 16px 24px;
+        font-size: 16px;
+        width: 100%;
+        border-radius: 8px;
+    }
+}
+
+/* Mobile Alerts */
+@media (max-width: 768px) {
+    .alert-area {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .alert {
+        padding: 16px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+    }
+    
+    .alert h4 {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    
+    .alert p {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+}
+
+/* Mobile Bottom Navigation */
+@media (max-width: 768px) {
+    .bottom-nav {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .nav-link {
+        font-size: 16px;
+        padding: 8px;
+    }
+    
+    .demo-info {
+        font-size: 14px;
+    }
+}
+
+/* Tablet Optimizations (768px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .pos-main {
+        gap: 25px;
+        padding: 25px;
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .api-demo {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

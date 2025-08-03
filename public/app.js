@@ -9,6 +9,54 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
 });
 
+// Show purchase update notification
+function showPurchaseUpdate() {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+        max-width: 300px;
+    `;
+    
+    notification.innerHTML = `
+        <div style="font-weight: 600; margin-bottom: 5px;">🎉 New Purchase Added!</div>
+        <div style="font-size: 14px; opacity: 0.9;">Your recent checkout has been synced to ShelFie</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 4000);
+}
+
+// Update loadCustomerPurchases to show notification for new purchases
+let lastPurchaseCount = 0;
+
+// Modify the displayPurchases function to track new purchases
+const originalDisplayPurchases = displayPurchases;
+displayPurchases = function(purchases) {
+    const currentCount = purchases.length;
+    
+    if (lastPurchaseCount > 0 && currentCount > lastPurchaseCount) {
+        showPurchaseUpdate();
+    }
+    
+    lastPurchaseCount = currentCount;
+    originalDisplayPurchases.call(this, purchases);
+};
+
 // Show different views
 function showView(view) {
     // Update navigation
@@ -239,3 +287,39 @@ function showError(message) {
     console.error(message);
     // You could add a proper error display here
 }
+
+
+// Auto-refresh purchases every 10 seconds when on purchases view
+let refreshInterval;
+
+function startAutoRefresh() {
+    refreshInterval = setInterval(() => {
+        if (currentView === 'purchases') {
+            loadCustomerPurchases();
+        }
+    }, 10000); // Refresh every 10 seconds
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+}
+
+// Update the showView function to handle auto-refresh
+const originalShowView = showView;
+showView = function(view) {
+    originalShowView.call(this, view);
+    
+    if (view === 'purchases') {
+        startAutoRefresh();
+    } else {
+        stopAutoRefresh();
+    }
+};
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadProducts();
+    startAutoRefresh();
+});
