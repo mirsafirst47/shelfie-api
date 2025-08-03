@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelFie - Smart Food Safety Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>ShelFie</h1>
+                <p>Smart Food Safety Platform</p>
+            </div>
+            <div class="demo-badge">
+                <span>Live Demo</span>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" onclick="showView('products')">All Products</button>
+            <button class="nav-btn" onclick="showView('purchases')">My Purchases</button>
+            <button class="nav-btn" onclick="showView('api')">API Demo</button>
+        </nav>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading ShelFie data...</p>
+        </div>
+
+        <!-- Products View -->
+        <div id="products-view" class="view active">
+            <div class="section-header">
+                <h2>🏪 Products in Database</h2>
+                <p>Products with ShelFie QR codes and expiration tracking</p>
+            </div>
+            <div id="products-grid" class="products-grid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Customer Purchases View -->
+        <div id="purchases-view" class="view">
+            <div class="section-header">
+                <h2>📱 Customer Purchases</h2>
+                <p>Simulating customer's grocery tracking experience</p>
+            </div>
+            
+            <div class="customer-selector">
+                <label for="customer-select">Select Customer:</label>
+                <select id="customer-select" onchange="loadCustomerPurchases()">
+                    <option value="CUST-001">Customer 001</option>
+                    <option value="CUST-002">Customer 002</option>
+                </select>
+            </div>
+            
+            <div id="purchases-grid" class="purchases-grid">
+                <!-- Purchases will be loaded here -->
+            </div>
+        </div>
+
+        <!-- API Demo View -->
+        <div id="api-view" class="view">
+            <div class="section-header">
+                <h2>🔌 API Endpoints</h2>
+                <p>Live API demonstration - try these endpoints</p>
+            </div>
+            
+            <div class="api-demo">
+                <div class="endpoint">
+                    <h3>GET /api/products</h3>
+                    <p>Retrieve all products with expiration data</p>
+                    <button onclick="testEndpoint('/api/products')">Test Endpoint</button>
+                </div>
+                
+                <div class="endpoint">
+                    <h3>GET /api/customers/CUST-001/purchases</h3>
+                    <p>Get customer's purchase history with expiration tracking</p>
+                    <button onclick="testEndpoint('/api/customers/CUST-001/purchases')">Test Endpoint</button>
+                </div>
+                
+                <div class="endpoint">
+                    <h3>GET /api/products/SKU-789456123</h3>
+                    <p>Get specific product details by SKU</p>
+                    <button onclick="testEndpoint('/api/products/SKU-789456123')">Test Endpoint</button>
+                </div>
+            </div>
+            
+            <div id="api-response" class="api-response">
+                <h4>API Response:</h4>
+                <pre id="response-content">Click an endpoint above to see the response</pre>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>ShelFie Demo - Y Combinator Application</p>
+            <p>Building the future of food safety infrastructure</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

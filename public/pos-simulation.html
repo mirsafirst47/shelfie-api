@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelFie POS Simulation - Store Checkout</title>
+    <link rel="stylesheet" href="pos-simulation.css">
+</head>
+<body>
+    <div class="pos-container">
+        <!-- Header -->
+        <header class="pos-header">
+            <div class="store-info">
+                <h1>🏪 Walmart Supercenter</h1>
+                <p>ShelFie-Enabled Checkout</p>
+            </div>
+            <div class="pos-status">
+                <span class="status-indicator online"></span>
+                <span>ShelFie Connected</span>
+            </div>
+        </header>
+
+        <!-- Main POS Interface -->
+        <div class="pos-main">
+            <!-- Left Side - Product Scanning -->
+            <div class="scanning-area">
+                <div class="scanner-section">
+                    <h2>🔍 Scan Products</h2>
+                    <div class="scanner-animation">
+                        <div class="laser-line"></div>
+                        <p>Ready to scan QR codes...</p>
+                    </div>
+                    
+                    <div class="quick-scan-buttons">
+                        <h3>Quick Demo - Scan Products:</h3>
+                        <div class="product-buttons">
+                            <button onclick="scanProduct('SKU-789456123')" class="scan-btn">
+                                🥛 Organic Milk
+                            </button>
+                            <button onclick="scanProduct('SKU-998877665')" class="scan-btn expiring">
+                                🥗 Caesar Dressing (Expires Soon!)
+                            </button>
+                            <button onclick="scanProduct('SKU-445789012')" class="scan-btn expired">
+                                🥬 Romaine Lettuce (RECALLED!)
+                            </button>
+                            <button onclick="scanProduct('SKU-987654321')" class="scan-btn">
+                                🍅 Canned Tomatoes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Selection -->
+                <div class="customer-section">
+                    <h3>👤 Customer Information</h3>
+                    <select id="customer-select" onchange="updateCustomer()">
+                        <option value="CUST-001">Customer 001 (Phone: 555-0123)</option>
+                        <option value="CUST-002">Customer 002 (Phone: 555-0456)</option>
+                        <option value="CUST-NEW">Walk-in Customer (No app)</option>
+                    </select>
+                    <div id="customer-status" class="customer-status">
+                        <span class="app-indicator">📱 ShelFie App Detected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Cart and Checkout -->
+            <div class="checkout-area">
+                <div class="cart-section">
+                    <h2>🛒 Shopping Cart</h2>
+                    <div id="cart-items" class="cart-items">
+                        <p class="empty-cart">Cart is empty - scan products to add them</p>
+                    </div>
+                    <div class="cart-total">
+                        <div class="total-line">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">$0.00</span>
+                        </div>
+                        <div class="total-line">
+                            <span>Tax:</span>
+                            <span id="tax">$0.00</span>
+                        </div>
+                        <div class="total-line final">
+                            <span><strong>Total:</strong></span>
+                            <span id="total"><strong>$0.00</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-actions">
+                    <button id="checkout-btn" onclick="processCheckout()" class="checkout-button" disabled>
+                        💳 Process Payment & Complete Order
+                    </button>
+                    <button onclick="clearCart()" class="clear-button">
+                        🗑️ Clear Cart
+                    </button>
+                </div>
+
+                <!-- ShelFie Magic Section -->
+                <div class="shelfie-magic">
+                    <h3>✨ ShelFie Magic Happening</h3>
+                    <div id="shelfie-actions" class="shelfie-actions">
+                        <p>Scan products to see ShelFie in action...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Area -->
+        <div id="alert-area" class="alert-area">
+            <!-- Alerts will appear here -->
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a href="/" class="nav-link">← Back to ShelFie Demo</a>
+            <div class="demo-info">
+                <span>Live POS Simulation</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>🎉 Checkout Complete!</h2>
+            <div id="checkout-summary">
+                <!-- Summary will be populated here -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="viewCustomerApp()" class="primary-btn">
+                    📱 View Customer's ShelFie App
+                </button>
+                <button onclick="closeModal()" class="secondary-btn">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="pos-simulation.js"></script>
+</body>
+</html>
