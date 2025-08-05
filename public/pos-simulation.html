@@ -28,23 +28,27 @@
                     <h2>🔍 Scan Products</h2>
                     <div class="scanner-animation">
                         <div class="laser-line"></div>
-                        <p>Ready to scan QR codes...</p>
+                        <p>Ready to scan  Barcodes...</p>
                     </div>
                     
                     <div class="quick-scan-buttons">
                         <h3>Quick Demo - Scan Products:</h3>
                         <div class="product-buttons">
-                            <button onclick="scanProduct('SKU-789456123')" class="scan-btn">
+                            <button onclick="scanBarcode('012345678901')" class="scan-btn">
                                 🥛 Organic Milk
+                                <div style="font-size: 12px; opacity: 0.7;">Barcode: 012345678901</div>
                             </button>
-                            <button onclick="scanProduct('SKU-998877665')" class="scan-btn expiring">
+                            <button onclick="scanBarcode('023456789012')" class="scan-btn expiring">
                                 🥗 Caesar Dressing (Expires Soon!)
+                                <div style="font-size: 12px; opacity: 0.7;">Barcode: 023456789012</div>
                             </button>
-                            <button onclick="scanProduct('SKU-445789012')" class="scan-btn expired">
+                            <button onclick="scanBarcode('034567890123')" class="scan-btn expired">
                                 🥬 Romaine Lettuce (RECALLED!)
+                                <div style="font-size: 12px; opacity: 0.7;">Barcode: 034567890123</div>
                             </button>
-                            <button onclick="scanProduct('SKU-987654321')" class="scan-btn">
+                            <button onclick="scanBarcode('045678901234')" class="scan-btn">
                                 🍅 Canned Tomatoes
+                                <div style="font-size: 12px; opacity: 0.7;">Barcode: 045678901234</div>
                             </button>
                         </div>
                     </div>

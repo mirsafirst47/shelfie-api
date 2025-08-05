@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Barcode Scanning</title>
+</head>
+<body>
+    <h1>Test Barcode Scanning</h1>
+    <button onclick="testScan()">Test Scan Milk</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testScan() {
+            console.log('Testing barcode scan...');
+            try {
+                const response = await fetch('/api/products/scan-barcode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        barcode: '012345678901',
+                        store_id: 'WALMART-001'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('Result:', result);
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

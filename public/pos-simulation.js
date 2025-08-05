@@ -5,10 +5,12 @@ let subtotal = 0;
 let tax = 0;
 let total = 0;
 
-// Sample product database (matching your API data)
+// Sample product database with barcodes
+// Update the products object to match the new database
 const products = {
-    'SKU-789456123': {
-        sku: 'SKU-789456123',
+    '012345678901': {  // Organic Milk
+        barcode: '012345678901',
+        sku: 'SKU-MILK-001',
         name: 'Organic Whole Milk',
         manufacturer: 'Great Value',
         price: 3.98,
@@ -16,8 +18,9 @@ const products = {
         expiry: '2025-08-25',
         status: 'fresh'
     },
-    'SKU-998877665': {
-        sku: 'SKU-998877665',
+    '023456789012': {  // Caesar Dressing
+        barcode: '023456789012',
+        sku: 'SKU-DRESSING-001',
         name: 'Caesar Salad Dressing',
         manufacturer: 'Wish-Bone',
         price: 2.49,
@@ -25,18 +28,20 @@ const products = {
         expiry: '2025-08-05',
         status: 'expiring'
     },
-    'SKU-445789012': {
-        sku: 'SKU-445789012',
-        name: 'Dole Romaine Lettuce',
+    '034567890123': {  // Romaine Lettuce (RECALLED)
+        barcode: '034567890123',
+        sku: 'SKU-LETTUCE-001',
+        name: 'Romaine Lettuce Hearts',
         manufacturer: 'Dole Fresh Vegetables',
         price: 2.99,
         batch: 'B2025034',
         expiry: '2025-07-25',
         status: 'recalled'
     },
-    'SKU-987654321': {
-        sku: 'SKU-987654321',
-        name: 'Canned Tomatoes',
+    '045678901234': {  // Canned Tomatoes
+        barcode: '045678901234',
+        sku: 'SKU-TOMATOES-001',
+        name: 'Diced Tomatoes 14.5oz',
         manufacturer: 'Hunts',
         price: 1.89,
         batch: 'B2025051',
@@ -45,42 +50,151 @@ const products = {
     }
 };
 
+// Add this function to pos-simulation.js
+async function scanBarcode(barcode) {
+    console.log(`🔍 Scanning barcode: ${barcode}`);
+    
+    // Add scanning animation
+    animateScanning({ name: 'Scanning...', barcode: barcode });
+    
+    try {
+        // Call the real API
+        const API_BASE = window.location.origin;
+        const response = await fetch(`${API_BASE}/api/products/scan-barcode`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                barcode: barcode,
+                store_id: 'WALMART-001'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const product = result.data;
+            
+            // Convert API response to cart format
+            const cartProduct = {
+                barcode: product.upc_barcode,
+                sku: product.sku,
+                name: product.product_name,
+                manufacturer: product.manufacturer,
+                price: products[barcode]?.price || 2.99, // Fallback price
+                batch: product.batch_number,
+                expiry: product.expiration_date,
+                status: product.safety_status
+            };
+            
+            setTimeout(() => {
+                addToCart(cartProduct);
+                updateShelFieActions(`✅ Scanned barcode ${barcode} - Captured batch ${product.batch_number}`);
+                
+                // Show alerts based on status
+                if (product.is_recalled) {
+                    showAlert('error', '🚨 RECALLED PRODUCT', `${product.product_name} is under FDA recall. Do not sell!`);
+                    updateShelFieActions(`🚨 RECALL ALERT: Barcode ${barcode} flagged for removal`);
+                } else if (product.safety_status === 'expiring') {
+                    showAlert('warning', '⏰ Expiring Soon', `${product.product_name} expires in ${product.days_until_expiry} days.`);
+                    updateShelFieActions(`⏰ Expiration alert: ${product.days_until_expiry} days remaining`);
+                } else if (product.safety_status === 'expired') {
+                    showAlert('error', '❌ EXPIRED PRODUCT', `${product.product_name} expired ${Math.abs(product.days_until_expiry)} days ago. Do not sell!`);
+                    updateShelFieActions(`❌ EXPIRED: Product expired ${Math.abs(product.days_until_expiry)} days ago`);
+                } else {
+                    updateShelFieActions(`📱 Product data synced to customer's ShelFie app`);
+                }
+            }, 1500);
+            
+        } else {
+            showAlert('error', 'Product Not Found', `Barcode ${barcode} not found in ShelFie database.`);
+            updateShelFieActions(`❌ Unknown barcode: ${barcode}`);
+        }
+        
+    } catch (error) {
+        console.error('Barcode scan error:', error);
+        showAlert('error', 'Scan Failed', `Failed to scan barcode ${barcode}. Please try again.`);
+        updateShelFieActions(`❌ Scan failed: ${error.message}`);
+    }
+}
+
 // Initialize POS system
 document.addEventListener('DOMContentLoaded', function() {
     updateCustomer();
     updateShelFieActions('POS System Ready - Scan products to begin checkout');
 });
 
-// Scan product function
-function scanProduct(sku) {
-    const product = products[sku];
-    if (!product) {
-        showAlert('error', 'Product Not Found', 'This product is not in the ShelFie database.');
-        return;
-    }
-
+// New barcode scanning function
+async function scanBarcode(barcode) {
+    console.log(`🔍 Scanning barcode: ${barcode}`);
+    
     // Add scanning animation
-    animateScanning(product);
-
-    // Add to cart after animation
-    setTimeout(() => {
-        addToCart(product);
-        updateShelFieActions(`✅ Captured expiration data for ${product.name}`);
+    animateScanning({ name: 'Scanning...', barcode: barcode });
+    
+    try {
+        // Call the real API
+        const API_BASE = window.location.origin;
+        const response = await fetch(`${API_BASE}/api/products/scan-barcode`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                barcode: barcode,
+                store_id: 'WALMART-001'
+            })
+        });
         
-        // Show special alerts for problem products
-        if (product.status === 'recalled') {
-            showAlert('error', '🚨 RECALLED PRODUCT', `${product.name} is under FDA recall. Do not sell!`);
-            updateShelFieActions(`🚨 RECALL ALERT: Product ${product.sku} flagged for removal`);
-        } else if (product.status === 'expiring') {
-            showAlert('warning', '⏰ Expiring Soon', `${product.name} expires in 3 days. Consider discount.`);
-            updateShelFieActions(`⏰ Expiration alert sent to customer app`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const product = result.data;
+            
+            // Convert API response to cart format
+            const cartProduct = {
+                barcode: product.upc_barcode,
+                sku: product.sku,
+                name: product.product_name,
+                manufacturer: product.manufacturer,
+                price: products[barcode]?.price || 2.99, // Fallback price
+                batch: product.batch_number,
+                expiry: product.expiration_date,
+                status: product.safety_status
+            };
+            
+            setTimeout(() => {
+                addToCart(cartProduct);
+                updateShelFieActions(`✅ Scanned barcode ${barcode} - Captured batch ${product.batch_number}`);
+                
+                // Show alerts based on status
+                if (product.is_recalled) {
+                    showAlert('error', '🚨 RECALLED PRODUCT', `${product.product_name} is under FDA recall. Do not sell!`);
+                    updateShelFieActions(`🚨 RECALL ALERT: Barcode ${barcode} flagged for removal`);
+                } else if (product.safety_status === 'expiring') {
+                    showAlert('warning', '⏰ Expiring Soon', `${product.product_name} expires in ${product.days_until_expiry} days.`);
+                    updateShelFieActions(`⏰ Expiration alert: ${product.days_until_expiry} days remaining`);
+                } else if (product.safety_status === 'expired') {
+                    showAlert('error', '❌ EXPIRED PRODUCT', `${product.product_name} expired ${Math.abs(product.days_until_expiry)} days ago. Do not sell!`);
+                    updateShelFieActions(`❌ EXPIRED: Product expired ${Math.abs(product.days_until_expiry)} days ago`);
+                } else {
+                    updateShelFieActions(`📱 Product data synced to customer's ShelFie app`);
+                }
+            }, 1500);
+            
         } else {
-            updateShelFieActions(`📱 Product data synced to customer's ShelFie app`);
+            showAlert('error', 'Product Not Found', `Barcode ${barcode} not found in ShelFie database.`);
+            updateShelFieActions(`❌ Unknown barcode: ${barcode}`);
         }
-    }, 1500);
+        
+    } catch (error) {
+        console.error('Barcode scan error:', error);
+        showAlert('error', 'Scan Failed', `Failed to scan barcode ${barcode}. Please try again.`);
+        updateShelFieActions(`❌ Scan failed: ${error.message}`);
+    }
 }
 
-// Add scanning animation
+// Update the animateScanning function to show barcode
 function animateScanning(product) {
     const scannerArea = document.querySelector('.scanner-animation');
     const originalContent = scannerArea.innerHTML;
@@ -88,9 +202,9 @@ function animateScanning(product) {
     scannerArea.innerHTML = `
         <div class="laser-line"></div>
         <div style="color: #10b981; font-family: 'Courier New', monospace;">
-            <p>🔍 SCANNING...</p>
+            <p>🔍 SCANNING BARCODE...</p>
             <p style="font-size: 14px; margin-top: 10px;">${product.name}</p>
-            <p style="font-size: 12px;">SKU: ${product.sku}</p>
+            <p style="font-size: 12px;">Barcode: ${product.barcode}</p>
         </div>
     `;
     
@@ -101,9 +215,9 @@ function animateScanning(product) {
         scannerArea.innerHTML = `
             <div class="laser-line"></div>
             <div style="color: #10b981; font-family: 'Courier New', monospace;">
-                <p>✅ SCAN COMPLETE</p>
+                <p>✅ BARCODE SCANNED</p>
                 <p style="font-size: 14px; margin-top: 10px;">${product.name}</p>
-                <p style="font-size: 12px;">Added to cart • ShelFie data captured</p>
+                <p style="font-size: 12px;">ShelFie data retrieved</p>
             </div>
         `;
         scannerArea.style.background = '#059669';
@@ -228,18 +342,31 @@ async function processCheckout() {
             if (currentCustomer !== 'CUST-NEW') {
                 updateShelFieActions('💫 Processing checkout transaction...');
                 
-                // Prepare checkout data
+                // Prepare checkout data with proper customer info
                 const checkoutData = {
                     customer_id: currentCustomer,
-                    customer_info: newCustomerData, // Include new customer data if exists
                     store_name: 'Walmart Supercenter',
                     items: cart.map(item => ({
+                        barcode: item.barcode,
                         sku: item.sku,
-                        quantity: item.quantity,
-                        price: item.price
+                        name: item.name,
+                        manufacturer: item.manufacturer,
+                        price: item.price,
+                        batch: item.batch,
+                        expiry: item.expiry,
+                        status: item.status,
+                        quantity: item.quantity
                     })),
                     total_amount: total
                 };
+                
+                // Add customer info if it's a new customer
+                if (newCustomerData && currentCustomer === newCustomerData.customer_id) {
+                    checkoutData.customer_info = newCustomerData;
+                    console.log('Adding new customer info to checkout:', newCustomerData);
+                }
+                
+                console.log('Sending checkout data:', checkoutData);
                 
                 // Process checkout via API
                 const API_BASE = window.location.origin;
@@ -251,12 +378,14 @@ async function processCheckout() {
                     body: JSON.stringify(checkoutData)
                 });
                 
-                if (response.ok) {
-                    const result = await response.json();
+                const result = await response.json();
+                console.log('Checkout API response:', result);
+                
+                if (response.ok && result.success) {
                     updateShelFieActions('✅ Checkout successful - All products synced to customer app!');
                     updateShelFieActions('📱 Customer can now view purchases in ShelFie app');
                 } else {
-                    throw new Error('Checkout API failed');
+                    throw new Error(result.error || 'Checkout API failed');
                 }
             } else {
                 updateShelFieActions('📄 Cash transaction completed - No app sync available');
@@ -267,8 +396,8 @@ async function processCheckout() {
             
         } catch (error) {
             console.error('Checkout error:', error);
-            updateShelFieActions('❌ Checkout failed - Using offline mode');
-            showCheckoutSuccess(); // Still show success for demo
+            updateShelFieActions(`❌ Checkout failed: ${error.message}`);
+            showAlert('error', 'Checkout Failed', error.message);
         }
         
         // Reset button
@@ -428,6 +557,7 @@ function updateCustomer() {
         updateShelFieActions('Customer has no ShelFie app - expiration data not captured');
         newCustomerForm.classList.add('hidden');
         isCreatingNewCustomer = false;
+        newCustomerData = null; // Clear any previous new customer data
     } else if (currentCustomer === 'CREATE-NEW') {
         status.innerHTML = '<span style="color: #3b82f6;">🆕 Creating new ShelFie customer...</span>';
         updateShelFieActions('Ready to create new ShelFie customer account');
@@ -438,6 +568,10 @@ function updateCustomer() {
         updateShelFieActions('Customer app connected - ready to sync expiration data');
         newCustomerForm.classList.add('hidden');
         isCreatingNewCustomer = false;
+        // Keep newCustomerData if this is a newly created customer
+        if (!newCustomerData || newCustomerData.customer_id !== currentCustomer) {
+            newCustomerData = null;
+        }
     }
 }
 
@@ -450,7 +584,7 @@ function createNewCustomer() {
     const timestamp = Date.now();
     const newCustomerId = `CUST-${timestamp.toString().slice(-6)}`;
     
-    // Store new customer data
+    // Store new customer data for checkout
     newCustomerData = {
         customer_id: newCustomerId,
         phone_number: phone || null,
@@ -459,6 +593,8 @@ function createNewCustomer() {
     };
     
     currentCustomer = newCustomerId;
+    
+    console.log('Created new customer data:', newCustomerData);
     
     // Update UI
     const status = document.getElementById('customer-status');
@@ -482,5 +618,6 @@ function createNewCustomer() {
 function cancelNewCustomer() {
     document.getElementById('new-customer-form').classList.add('hidden');
     document.getElementById('customer-select').value = 'CUST-001';
+    newCustomerData = null; // Clear any new customer data
     updateCustomer();
 }
